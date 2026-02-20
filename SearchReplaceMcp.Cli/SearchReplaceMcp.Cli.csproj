@@ -1,6 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <None Include="..\..\Careless\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SearchReplaceMcp.Core\SearchReplaceMcp.Core.csproj" />
   </ItemGroup>
 
@@ -23,12 +30,15 @@
     <Version>1.0.0</Version>
     <Authors>Adam Tovatt</Authors>
     <Description>A search-and-replace tool that stages and executes replacements safely. Works as both a CLI tool and MCP server.</Description>
-    <PackageTags>mcp;search-replace;cli-tool</PackageTags>
+    <PackageTags>mcp;search-replace;cli-tool;search;replace;search-and-replace;mcp-server;claude-code;</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>SearchReplaceMcp</Title>
     <Product>SearchReplaceMcp</Product>
     <Copyright>MIT</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/AdamTovatt/search-replace-mcp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AdamTovatt/search-replace-mcp</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
 </Project>
