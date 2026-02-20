@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SearchReplaceMcp.Cli/SearchReplaceMcp.Cli.csproj" />
+  <Project Path="SearchReplaceMcp.Core/SearchReplaceMcp.Core.csproj" />
+  <Project Path="SearchReplaceMcp.Tests/SearchReplaceMcp.Tests.csproj" />
+</Solution>
