@@ -27,7 +27,7 @@
     <ToolCommandName>sr</ToolCommandName>
     <PackageOutputPath>./bin/nupkg</PackageOutputPath>
     <PackageId>SearchReplaceMcp</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Authors>Adam Tovatt</Authors>
     <Description>A search-and-replace tool that stages and executes replacements safely. Works as both a CLI tool and MCP server.</Description>
     <PackageTags>mcp;search-replace;cli-tool;search;replace;search-and-replace;mcp-server;claude-code;</PackageTags>

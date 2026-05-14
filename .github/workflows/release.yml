@@ -1,0 +1,51 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Extract version from tag
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+    - name: Verify csproj version matches tag
+      run: |
+        CSPROJ_VERSION=$(grep -oP '(?<=<Version>)[^<]+' SearchReplaceMcp.Cli/SearchReplaceMcp.Cli.csproj)
+        if [ "$CSPROJ_VERSION" != "${{ steps.version.outputs.version }}" ]; then
+          echo "Tag version (${{ steps.version.outputs.version }}) does not match csproj <Version> ($CSPROJ_VERSION)."
+          echo "Bump <Version> in SearchReplaceMcp.Cli.csproj before tagging."
+          exit 1
+        fi
+
+    - name: Restore
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore -p:Version=${{ steps.version.outputs.version }}
+
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal
+
+    - name: Push to NuGet
+      run: >
+        dotnet nuget push
+        SearchReplaceMcp.Cli/bin/nupkg/SearchReplaceMcp.${{ steps.version.outputs.version }}.nupkg
+        --source https://api.nuget.org/v3/index.json
+        --api-key ${{ secrets.NUGET_API_KEY }}
+        --skip-duplicate

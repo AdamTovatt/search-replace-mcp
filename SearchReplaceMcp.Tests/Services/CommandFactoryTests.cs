@@ -140,5 +140,31 @@ namespace SearchReplaceMcp.Tests.Services
         {
             Assert.Throws<ArgumentException>(() => _factory.CreateCommand(new[] { "unknown" }));
         }
+
+        [Fact]
+        public void CreateCommand_SearchWithNoEcma_ReturnsSearchCommand()
+        {
+            ICommand command = _factory.CreateCommand(new[] { "search", "hello", "-r", "--no-ecma" });
+            Assert.IsType<SearchCommand>(command);
+        }
+
+        [Fact]
+        public void CreateCommand_ReplaceWithNoEcma_ReturnsReplaceCommand()
+        {
+            ICommand command = _factory.CreateCommand(new[] { "replace", "old", "new", "-r", "--no-ecma" });
+            Assert.IsType<ReplaceCommand>(command);
+        }
+
+        [Fact]
+        public void CreateCommand_SearchWithUnknownOption_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() => _factory.CreateCommand(new[] { "search", "hello", "--bogus" }));
+        }
+
+        [Fact]
+        public void CreateCommand_ReplaceWithUnknownOption_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() => _factory.CreateCommand(new[] { "replace", "old", "new", "--bogus" }));
+        }
     }
 }

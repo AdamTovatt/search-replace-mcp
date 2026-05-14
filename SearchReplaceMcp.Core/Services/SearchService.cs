@@ -144,6 +144,13 @@ namespace SearchReplaceMcp.Core.Services
                 regexOptions |= RegexOptions.IgnoreCase;
             }
 
+            // ECMAScript mode lets backreferences to non-participating groups match empty
+            // (e.g. `(a)(b)?\2` succeeds against "a"). Default .NET regex fails the whole match.
+            if (options.UseRegex && options.EcmaScript)
+            {
+                regexOptions |= RegexOptions.ECMAScript;
+            }
+
             return new Regex(regexPattern, regexOptions);
         }
 

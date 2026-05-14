@@ -2,6 +2,7 @@ using Moq;
 using SearchReplaceMcp.Core.Interfaces;
 using SearchReplaceMcp.Core.Models;
 using SearchReplaceMcp.Core.Services;
+using System.Text.RegularExpressions;
 
 namespace SearchReplaceMcp.Tests.Services
 {
@@ -170,6 +171,66 @@ namespace SearchReplaceMcp.Tests.Services
             var regex = SearchService.BuildRegex("foo.bar", new SearchOptions(UseRegex: true));
             Assert.Matches(regex, "foo.bar");
             Assert.Matches(regex, "fooXbar");
+        }
+
+        [Fact]
+        public async Task SearchAsync_Regex_BackreferenceToNonParticipatingGroup_MatchesEmpty()
+        {
+            // ECMAScript mode (default with UseRegex): backreference to a group that
+            // didn't participate matches empty rather than failing the whole match.
+            // Pattern matches a class name optionally followed by /opacity, then a space
+            // and the same class+opacity repeated. \2 must match empty when no opacity.
+            _fileOperationServiceMock
+                .Setup(f => f.ReadFileLinesAsync("file.css", "/base", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new[] { "text-red text-red", "text-blue/50 text-blue/50" });
+
+            List<SearchMatch> matches = await _searchService.SearchAsync(
+                new List<string> { "file.css" }, "/base", @"(text-\w+)(\/\d+)? \1\2",
+                new SearchOptions(UseRegex: true), CancellationToken.None);
+
+            Assert.Equal(2, matches.Count);
+            Assert.Equal("text-red text-red", matches[0].MatchedText);
+            Assert.Equal("text-blue/50 text-blue/50", matches[1].MatchedText);
+        }
+
+        [Fact]
+        public async Task SearchAsync_Regex_NoEcma_FailsBackreferenceToNonParticipatingGroup()
+        {
+            // With EcmaScript opted out, .NET's default regex kicks in and the whole
+            // match fails for the no-opacity input because group 2 didn't participate.
+            _fileOperationServiceMock
+                .Setup(f => f.ReadFileLinesAsync("file.css", "/base", It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new[] { "text-red text-red", "text-blue/50 text-blue/50" });
+
+            List<SearchMatch> matches = await _searchService.SearchAsync(
+                new List<string> { "file.css" }, "/base", @"(text-\w+)(\/\d+)? \1\2",
+                new SearchOptions(UseRegex: true, EcmaScript: false), CancellationToken.None);
+
+            Assert.Single(matches);
+            Assert.Equal("text-blue/50 text-blue/50", matches[0].MatchedText);
+        }
+
+        [Fact]
+        public void BuildRegex_NoEcma_SupportsLookbehind()
+        {
+            // Look-behind is unsupported in ECMAScript mode but available in .NET regex.
+            Regex regex = SearchService.BuildRegex(@"(?<=foo)bar", new SearchOptions(UseRegex: true, EcmaScript: false));
+            Assert.Matches(regex, "foobar");
+            Assert.DoesNotMatch(regex, "bazbar");
+        }
+
+        [Fact]
+        public void BuildRegex_EcmaScriptIgnoredWhenUseRegexIsFalse()
+        {
+            // ECMAScript only kicks in for true regex patterns. Plain-text searches
+            // should be unaffected by the EcmaScript flag.
+            Regex withEcma = SearchService.BuildRegex("foo.bar", new SearchOptions(EcmaScript: true));
+            Regex withoutEcma = SearchService.BuildRegex("foo.bar", new SearchOptions(EcmaScript: false));
+
+            Assert.Matches(withEcma, "foo.bar");
+            Assert.DoesNotMatch(withEcma, "fooXbar");
+            Assert.Matches(withoutEcma, "foo.bar");
+            Assert.DoesNotMatch(withoutEcma, "fooXbar");
         }
 
         [Fact]

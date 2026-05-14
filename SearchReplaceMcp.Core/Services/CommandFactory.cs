@@ -96,12 +96,12 @@ namespace SearchReplaceMcp.Core.Services
 
         private ICommand CreateSearchCommand(string[] args)
         {
-            // sr search <pattern> [-c|--match-case] [-w|--whole-word] [-r|--regex]
+            // sr search <pattern> [-c|--match-case] [-w|--whole-word] [-r|--regex] [--no-ecma]
             if (args.Length < 2)
             {
                 throw new ArgumentException(
                     "Search command requires a pattern. " +
-                    "Usage: sr search <pattern> [-c|--match-case] [-w|--whole-word] [-r|--regex]");
+                    "Usage: sr search <pattern> [-c|--match-case] [-w|--whole-word] [-r|--regex] [--no-ecma]");
             }
 
             string pattern = args[1];
@@ -112,12 +112,12 @@ namespace SearchReplaceMcp.Core.Services
 
         private ICommand CreateReplaceCommand(string[] args)
         {
-            // sr replace <pattern> <replacement> [-c|--match-case] [-w|--whole-word] [-r|--regex] [-p|--preserve-case]
+            // sr replace <pattern> <replacement> [-c|--match-case] [-w|--whole-word] [-r|--regex] [-p|--preserve-case] [--no-ecma]
             if (args.Length < 3)
             {
                 throw new ArgumentException(
                     "Replace command requires a pattern and replacement. " +
-                    "Usage: sr replace <pattern> <replacement> [-c|--match-case] [-w|--whole-word] [-r|--regex] [-p|--preserve-case]");
+                    "Usage: sr replace <pattern> <replacement> [-c|--match-case] [-w|--whole-word] [-r|--regex] [-p|--preserve-case] [--no-ecma]");
             }
 
             string pattern = args[1];
@@ -133,6 +133,7 @@ namespace SearchReplaceMcp.Core.Services
             bool matchWholeWord = false;
             bool useRegex = false;
             bool preserveCase = false;
+            bool ecmaScript = true;
 
             for (int i = startIndex; i < args.Length; i++)
             {
@@ -155,10 +156,16 @@ namespace SearchReplaceMcp.Core.Services
                     case "--preserve-case":
                         preserveCase = true;
                         break;
+                    case "--no-ecma":
+                        ecmaScript = false;
+                        break;
+                    default:
+                        throw new ArgumentException(
+                            $"Unknown option: '{args[i]}'. Use 'sr help' to see available options.");
                 }
             }
 
-            return new SearchOptions(matchCase, matchWholeWord, useRegex, preserveCase);
+            return new SearchOptions(matchCase, matchWholeWord, useRegex, preserveCase, ecmaScript);
         }
     }
 }

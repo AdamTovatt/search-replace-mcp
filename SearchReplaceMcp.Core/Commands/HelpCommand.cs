@@ -24,9 +24,14 @@ Usage:
 
 Search/Replace Options:
   -c, --match-case       Case-sensitive matching
-  -w, --whole-word       Match whole words only
+  -w, --whole-word       Match whole words only (with -r, uses ASCII word boundaries
+                         by default; pass --no-ecma for Unicode-aware boundaries)
   -r, --regex            Treat pattern as regular expression
   -p, --preserve-case    Preserve the case pattern of matched text (replace only)
+      --no-ecma          With --regex, fall back to .NET regex (enables look-behind, named
+                         groups, and Unicode-aware \b, but disallows backreferences to
+                         non-participating groups). By default, ECMAScript mode is on so
+                         `(a)(b)?\2` matches ""a"".
 
 MCP Server Mode:
   sr --mcp               Start as MCP server (stdio transport)

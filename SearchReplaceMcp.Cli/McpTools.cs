@@ -88,6 +88,7 @@ namespace SearchReplaceMcp.Cli
         /// <param name="wholeWord">Whether to match whole words only. Default false.</param>
         /// <param name="useRegex">Whether the pattern is a regular expression. Default false.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
+        /// <param name="ecmaScript">Whether to use ECMAScript regex semantics. Default true.</param>
         /// <returns>The search results.</returns>
         [McpServerTool(Name = "sr_search")]
         [Description("Search added documents for matches without staging any replacements. Use sr_replace instead if you want to stage replacements.")]
@@ -100,9 +101,11 @@ namespace SearchReplaceMcp.Cli
             bool wholeWord,
             [Description("Treat pattern as regular expression (default: false)")]
             bool useRegex,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            [Description("Use ECMAScript regex semantics so backreferences to non-participating groups match empty (default: true). Set false to use .NET regex (enables look-behind, named groups, etc., but empty-backreference matches will fail). Note: with --regex and --whole-word, ECMAScript mode uses ASCII word boundaries; disable for Unicode-aware \\b.")]
+            bool ecmaScript = true)
         {
-            SearchOptions options = new SearchOptions(matchCase, wholeWord, useRegex);
+            SearchOptions options = new SearchOptions(matchCase, wholeWord, useRegex, PreserveCase: false, EcmaScript: ecmaScript);
             SearchCommand command = new SearchCommand(_sessionManager, _searchService, pattern, options);
             CommandResult result = await command.ExecuteAsync(cancellationToken);
 
@@ -119,6 +122,7 @@ namespace SearchReplaceMcp.Cli
         /// <param name="useRegex">Whether the pattern is a regular expression. Default false.</param>
         /// <param name="preserveCase">Whether to preserve case pattern. Default false.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
+        /// <param name="ecmaScript">Whether to use ECMAScript regex semantics. Default true.</param>
         /// <returns>The result of the operation.</returns>
         [McpServerTool(Name = "sr_replace")]
         [Description("Search and stage replacements. Does not modify files yet - use sr_preview to review changes, then sr_commit to apply them. Can be called multiple times with different patterns; overlapping replacements are automatically skipped.")]
@@ -135,9 +139,11 @@ namespace SearchReplaceMcp.Cli
             bool useRegex,
             [Description("Preserve the case pattern of matched text in replacements (default: false)")]
             bool preserveCase,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            [Description("Use ECMAScript regex semantics so backreferences to non-participating groups match empty (default: true). Set false to use .NET regex (enables look-behind, named groups, etc., but empty-backreference matches will fail). Note: with --regex and --whole-word, ECMAScript mode uses ASCII word boundaries; disable for Unicode-aware \\b.")]
+            bool ecmaScript = true)
         {
-            SearchOptions options = new SearchOptions(matchCase, wholeWord, useRegex, preserveCase);
+            SearchOptions options = new SearchOptions(matchCase, wholeWord, useRegex, PreserveCase: preserveCase, EcmaScript: ecmaScript);
             ReplaceCommand command = new ReplaceCommand(_sessionManager, _searchService, pattern, replacement, options);
             CommandResult result = await command.ExecuteAsync(cancellationToken);
 
